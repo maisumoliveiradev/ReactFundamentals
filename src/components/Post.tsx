@@ -1,126 +1,138 @@
-import { format, formatDistanceToNow } from 'date-fns';
-import ptBR from 'date-fns/locale/pt-BR'
-import { ChangeEvent, FormEvent, InvalidEvent, useState } from 'react';
+import { format, formatDistanceToNow } from "date-fns";
+import ptBR from "date-fns/locale/pt-BR";
+import { ChangeEvent, FormEvent, InvalidEvent, useState } from "react";
 
-import { Avatar } from './Avatar'
-import { Comment } from './Comment'
-import styles from './Post.module.css'
+import { Avatar } from "./Avatar";
+import { Comment } from "./Comment";
+import styles from "./Post.module.css";
 
-
-interface Author{
-    name: string;
-    role: string;
-    avatarUrl: string;
+interface Author {
+  name: string;
+  role: string;
+  avatarUrl: string;
 }
 
 interface Content {
-    type: 'paragraph' | 'link';
-    content: string;
+  type: "paragraph" | "link";
+  content: string;
 }
 
-interface PostProps{
-    author: Author;
-    publishedAt: Date;
-    content: Content[];
+interface PostProps {
+  author: Author;
+  publishedAt: Date;
+  content: Content[];
 }
 
 //estado = variáveis que eu quero que o componente monitore
 
 export function Post({ author, publishedAt, content }: PostProps) {
-    const [comments, setComments] = useState([
-        'Post muito bacana, hein?!'
-    ])
+  const [comments, setComments] = useState(["Post muito bacana, hein?!"]);
 
-    const [newCommentText, setNewCommentText] = useState('')
+  const [newCommentText, setNewCommentText] = useState("");
 
-    const publishedDateFormatted = format(publishedAt, "d 'de' LLLL 'às' HH:mm'h'", {
-        locale: ptBR
-    })
-
-    const publishedDaterRelativeToNow = formatDistanceToNow(publishedAt, {
-        locale: ptBR,
-        addSuffix: true,
-    })
-
-    function handleCreateNewComment(event: FormEvent) {
-        event.preventDefault()
-        setComments([...comments, newCommentText]);
-        setNewCommentText('');
+  const publishedDateFormatted = format(
+    publishedAt,
+    "d 'de' LLLL 'às' HH:mm'h'",
+    {
+      locale: ptBR,
     }
+  );
 
-    function handleNewCommentChange(event: ChangeEvent<HTMLTextAreaElement>) {
-        event.target.setCustomValidity('');
-        setNewCommentText(event.target.value);
-    }
+  const publishedDaterRelativeToNow = formatDistanceToNow(publishedAt, {
+    locale: ptBR,
+    addSuffix: true,
+  });
 
-    function handleNewCommentInvalid(event: InvalidEvent<HTMLTextAreaElement>) {
-        event.target.setCustomValidity('Esse campo é obrigatório')
-    }
+  function handleCreateNewComment(event: FormEvent) {
+    event.preventDefault();
+    setComments([...comments, newCommentText]);
+    setNewCommentText("");
+  }
 
-    function deleteComment(commentToDelete: String) {
-        //imutabilidade -> as variáveis não sofrem mutação, nós criamos um novo valor (um novo espaço na memória)
+  function handleNewCommentChange(event: ChangeEvent<HTMLTextAreaElement>) {
+    event.target.setCustomValidity("");
+    setNewCommentText(event.target.value);
+  }
 
-        const commentsWithoutDeletedOne = comments.filter(comment => {
-            return comment !== commentToDelete;
-        })
-        setComments(commentsWithoutDeletedOne);
-    }
+  function handleNewCommentInvalid(event: InvalidEvent<HTMLTextAreaElement>) {
+    event.target.setCustomValidity("Esse campo é obrigatório");
+  }
 
-    const isNewCommnetEmpty = newCommentText.length === 0;
+  function deleteComment(commentToDelete: String) {
+    //imutabilidade -> as variáveis não sofrem mutação, nós criamos um novo valor (um novo espaço na memória)
 
-    return (
-        <article className={styles.post}>
-            <header>
-                <div className={styles.author}>
-                    <Avatar src={author.avatarUrl} />
-                    <div className={styles.authorInfo}>
-                        <strong>{author.name}</strong>
-                        <span>{author.role}</span>
-                    </div>
-                </div>
+    const commentsWithoutDeletedOne = comments.filter((comment) => {
+      return comment !== commentToDelete;
+    });
+    setComments(commentsWithoutDeletedOne);
+  }
 
-                <time title={publishedDateFormatted} dateTime={publishedAt.toISOString()}>{publishedDaterRelativeToNow}</time>
-            </header>
-            <div className={styles.content}>
-                {content.map(line => {
-                    if (line.type === 'paragraph') {
-                        return <p key={line.content}>{line.content}</p>
-                    } else if (line.type === 'link') {
-                        return <p key={line.content}><a href="#">{line.content}</a></p>
-                    }
+  const isNewCommnetEmpty = newCommentText.length === 0;
 
-                })}
-            </div>
+  return (
+    <article className={styles.post}>
+      <header>
+        <div className={styles.author}>
+          <Avatar src={author.avatarUrl} />
+          <div className={styles.authorInfo}>
+            <strong>{author.name}</strong>
+            <span>{author.role}</span>
+          </div>
+        </div>
 
-            <form onSubmit={handleCreateNewComment} className={styles.commentForm}>
-                <strong>Deixe seu feedback</strong>
+        <time
+          title={publishedDateFormatted}
+          dateTime={publishedAt.toISOString()}
+        >
+          {publishedDaterRelativeToNow}
+        </time>
+      </header>
+      <div className={styles.content}>
+        {content.map((line) => {
+          if (line.type === "paragraph") {
+            return <p key={line.content}>{line.content}</p>;
+          } else if (line.type === "link") {
+            return (
+              <p key={line.content}>
+                <a href="https://github.com/maisumoliveiradev">
+                  {line.content}
+                </a>
+              </p>
+            );
+          }
+        })}
+      </div>
 
-                <textarea
-                    name='comment'
-                    placeholder='Deixe um comentário'
-                    value={newCommentText}
-                    onChange={handleNewCommentChange}
-                    onInvalid={handleNewCommentInvalid}
-                    required
-                />
+      <form onSubmit={handleCreateNewComment} className={styles.commentForm}>
+        <strong>Deixe seu feedback</strong>
 
-                <footer>
-                    <button type="submit" disabled={isNewCommnetEmpty}>Publicar</button>
-                </footer>
-            </form>
+        <textarea
+          name="comment"
+          placeholder="Deixe um comentário"
+          value={newCommentText}
+          onChange={handleNewCommentChange}
+          onInvalid={handleNewCommentInvalid}
+          required
+        />
 
-            <div className={styles.commentList}>
-                {comments.map(comment => {
-                    return (
-                        <Comment
-                            key={comment}
-                            content={comment}
-                            onDeleteComment={deleteComment}
-                        />
-                    )
-                })}
-            </div>
+        <footer>
+          <button type="submit" disabled={isNewCommnetEmpty}>
+            Publicar
+          </button>
+        </footer>
+      </form>
 
-        </article>
-    )
+      <div className={styles.commentList}>
+        {comments.map((comment) => {
+          return (
+            <Comment
+              key={comment}
+              content={comment}
+              onDeleteComment={deleteComment}
+            />
+          );
+        })}
+      </div>
+    </article>
+  );
 }
